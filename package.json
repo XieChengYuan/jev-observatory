@@ -1,0 +1,30 @@
+{
+  "name": "jev-observatory",
+  "version": "1.1.0",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/XieChengYuan/jev-observatory.git" },
+  "homepage": "https://github.com/XieChengYuan/jev-observatory#readme",
+  "bin": { "jev-observatory": "bin/cli.mjs" },
+  "files": ["bin/", "src/", "public/", "scripts/discover.mjs", "examples/", "README.md", "SECURITY.md", "LICENSE"],
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:package": "node scripts/package-smoke.mjs",
+    "discover": "node scripts/discover.mjs",
+    "setup": "node bin/cli.mjs setup",
+    "setup:demo": "node scripts/setup.mjs",
+    "doctor": "node bin/cli.mjs doctor",
+    "config": "node scripts/client-config.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "jsonc-parser": "3.3.1",
+    "smol-toml": "1.8.0",
+    "zod": "3.25.76"
+  },
+  "description": "Local-first tool-call observability for stdio MCP servers"
+}

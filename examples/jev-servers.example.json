@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "typesafe": {
+      "name": "TypeSafe MCP",
+      "command": "evaluate",
+      "args": ["mcp"],
+      "secretEnv": ["TYPESAFE_API_KEY"]
+    },
+    "jev": {
+      "name": "Jev MCP",
+      "command": "npx",
+      "args": ["-y", "@jkudish/jev-mcp@0.5.0"],
+      "env": {"JEV_PROVIDER": "typesafe"},
+      "secretEnv": ["TYPESAFE_API_KEY"]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "demo": {
+      "name": "Local Echo",
+      "command": "${NODE}",
+      "args": ["${ROOT}/src/demo-server.mjs"],
+      "secretEnv": []
+    },
+    "your-server": {
+      "name": "Your MCP Server",
+      "command": "your-mcp-command",
+      "args": [],
+      "envVars": [],
+      "secretEnv": ["YOUR_API_KEY"]
+    }
+  }
+}

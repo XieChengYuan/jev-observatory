@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jev活动看板 · MCP 调用记录</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">J</span><span>Jev活动看板<small>MCP ACTIVITY</small></span></a>
+  <nav aria-label="主导航"><button class="nav active" data-view="calls"><span>01</span> 活动记录 <b id="nav-count">0</b></button><button class="nav" data-view="settings"><span>02</span> 连接设置</button></nav>
+  <div class="side-section"><p class="side-title">已接入的服务</p><div id="service-links"></div></div>
+  <div class="side-footer"><span id="connection" class="connection">正在连接…</span><p>仅本机访问 · 本地存储<br>记录可观察的过程，不展示模型内部思考。</p></div>
+</aside>
+<main id="main">
+  <header class="topbar"><span>JEV <span class="slash">/</span> <strong id="page-label">调用记录</strong></span><span class="local-badge">LOCAL <span>127.0.0.1</span></span></header>
+
+  <section id="view-calls" class="view">
+    <div class="page-heading"><div><h1>Jev活动看板</h1><p>自动读取 MCP 调用、原始返回与用量。</p></div><div class="monitor-controls"><span id="follow-status" class="live-pill">正在连接…</span><button id="listening-toggle" class="listening-toggle" type="button" role="switch" aria-label="监听 MCP 活动" aria-checked="true" disabled>停止监听</button></div></div>
+    <div class="view-switch" role="group" aria-label="看板显示方式"><button id="mode-visual" aria-pressed="true">可视化</button><button id="mode-text" aria-pressed="false">文字详情</button></div>
+    <section id="visual-panel" class="pipeline-section" aria-label="调用流水线"><div class="pipeline-heading"><div><h2><span class="section-number">01</span> 调用如何变成判断</h2><p id="pipeline-caption">等待新的 MCP 调用，流程会自动开始。</p></div><div class="pipeline-actions"><span id="pipeline-mode">实时监听</span><button id="pipeline-pause" hidden>暂停动画</button><button id="pipeline-replay" hidden>回放这次调用</button></div></div><p id="pipeline-totals" class="pipeline-totals"></p><div id="pipeline-board" class="pipeline-board"><p class="pipeline-idle">正在监听 MCP。收到调用后，输入与判断会自动出现在这里。</p></div><p id="pipeline-progress" class="pipeline-progress" aria-live="polite">无需手动运行工具。</p></section>
+    <div class="metrics" aria-label="调用概况"><div><span>累计调用</span><strong id="stat-total">0</strong></div><div><span>进行中</span><strong id="stat-running">0</strong></div><div><span>成功返回</span><strong id="stat-success">0</strong></div><div><span>失败 / 取消</span><strong id="stat-error">0</strong></div><div><span>平均成功耗时</span><strong id="stat-duration">—</strong></div></div>
+    <div class="monitor-metrics"><div><span>最近 60 秒调用</span><strong id="stat-rpm">0</strong></div><div><span>最近 60 秒输入 tokens</span><strong id="stat-input">—</strong></div><div><span>最近 60 秒输出 tokens</span><strong id="stat-output">—</strong></div><div><span>最近 60 秒输出 tokens/s</span><strong id="stat-tps">—</strong></div></div>
+    <div id="text-panel" class="workbench" hidden>
+      <section class="list-panel" aria-label="调用列表"><div class="list-caption"><span>自动接收的调用 <b id="result-count">0</b></span><button class="text-button" id="export">导出 JSON ↗</button></div><div id="call-list" class="call-list"><div class="loading-state">正在读取本地记录…</div></div><div class="pagination"><button id="prev-page" disabled>上一页</button><span id="page-info">第 1 页</span><button id="next-page" disabled>下一页</button></div></section>
+      <section id="detail" class="detail-panel" aria-label="调用详情"><div class="empty-detail"><div class="trace-mark">↳</div><h2>正在监听 MCP 调用</h2><p>Agent 开始调用工具时，输入与输出会自动显示在这里。无需手动运行。</p></div></section>
+    </div>
+  </section>
+  <section id="view-settings" class="view" hidden><div class="page-heading"><div><h1>连接设置</h1><p>按服务配置凭据与发现工具。新增服务请编辑本地配置文件后重启看板。</p></div></div><div class="settings-layout"><section class="settings-section"><h2>服务凭据</h2><label for="settings-server">选择服务</label><select id="settings-server"></select><p id="key-status">正在读取配置…</p><form id="key-form"><label for="secret-name">凭据字段</label><select id="secret-name"></select><label for="api-key">填写或替换凭据</label><input id="api-key" type="password" autocomplete="off" placeholder="仅保存在本机，不会显示已保存的值" required><p class="hint">凭据保存在当前用户的私有本地文件中，不写入项目、调用记录或导出文件。保存后下一次调用生效。</p><p id="key-message" role="status"></p><button class="primary" type="submit">保存凭据</button></form><button id="discover-server" type="button">发现 / 刷新工具</button><p id="discover-message" role="status"></p></section><section class="settings-section"><h2>服务与存储</h2><div id="server-status"></div><dl class="settings-facts"><dt>调用记录</dt><dd>SQLite · 开启监听时，即使关闭看板也会继续记录 MCP 调用</dd><dt>更新方式</dt><dd>自动刷新，每秒读取最新记录</dd><dt>保留策略</dt><dd>保留全部记录；导出当前筛选最近最多 500 条</dd><dt>服务配置文件</dt><dd id="config-path"></dd><dt>本地目录</dt><dd id="data-path"></dd></dl><p class="hint">工具发现会启动配置中的服务并读取工具列表。修改服务配置后需重启看板与 MCP 客户端。当前仅代理 tools/list 与 tools/call，不转发资源、提示词或交互式回调。</p></section></div></section>
+</main><div id="toast" class="toast" role="status" hidden></div>
+</body></html>
