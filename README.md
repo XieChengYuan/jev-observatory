@@ -1,56 +1,56 @@
-# Jev 活动看板
+# Jev Activity Dashboard
 
-**看看 Agent 交给 Jev 的输入、判断要求和真实返回。**
+**See what your agent sends to Jev, what it asks Jev to judge, and what comes back.**
 
-一个独立运行的本地 MCP 活动看板。代理自动记录，看板自动读取；不用 Agent 汇报，不需要手动发起演示，看板本身不额外调用模型。界面为中文。
+An independent, local MCP activity dashboard. The proxy records calls automatically, and the dashboard reads those records. No agent-written reports or manually triggered demos are needed. The dashboard itself makes no additional model calls. The application interface is currently in Chinese.
 
 ![MIT license](https://img.shields.io/badge/license-MIT-eee6ce)
 ![Node.js](https://img.shields.io/badge/Node.js-22.13%2B-eee6ce)
 
-## 安装与接入
+## Installation and setup
 
-需要 [Node.js 22.13 或更新版本](https://nodejs.org/)（含 npm）。先关闭要更新配置的 MCP 客户端，避免它同时保存设置。
+Requires [Node.js 22.13 or newer](https://nodejs.org/), including npm. Close the MCP clients whose configuration you are about to update so they do not save settings at the same time.
 
 ```sh
 npm install -g https://github.com/XieChengYuan/jev-observatory/releases/download/v1.1.0/jev-observatory-1.1.0.tgz
 jev-observatory setup
 ```
 
-也可以直接从 GitHub 源码安装（需要 Git）：
+Alternatively, install directly from GitHub source (requires Git):
 
 ```sh
 npm install -g github:XieChengYuan/jev-observatory
 jev-observatory setup
 ```
 
-安装向导显示将接入的客户端，备份原配置后自动完成接入，随后启动并打开 [本地看板](http://127.0.0.1:4318/)。**重启对应 MCP 客户端，让它加载新配置**。部分客户端还会要求启用或信任该 MCP，按客户端提示操作。正常让 Agent 使用 Jev 即可。
+The setup wizard lists the clients it will connect, backs up their configuration, applies the integration, and starts and opens the [local dashboard](http://127.0.0.1:4318/). **Restart the affected MCP clients to load the new configuration.** Some clients may also ask you to enable or trust the MCP server. Follow their prompts, then let your agent use Jev normally.
 
-| 你的情况 | 向导自动完成什么 |
+| Your setup | What the wizard does |
 | --- | --- |
-| 已有 Jev MCP | 保留服务名称、参数、环境变量及客户端权限设置，把启动入口接到观察代理；复用现有上游 |
-| 还没有 Jev MCP | 在本机安装 `@jkudish/jev-mcp@0.5.0`，创建 Jev 服务和代理配置 |
-| 已经接入过 | 跳过已接入条目，不重复套代理、不清空历史 |
+| Jev MCP is already configured | Preserves the service name, arguments, environment variables, and client permission settings; routes its launch through the observation proxy and reuses the existing upstream server |
+| Jev MCP is not configured | Installs `@jkudish/jev-mcp@0.5.0` locally and creates the Jev service and proxy configuration |
+| The service is already connected through the proxy | Skips that entry without adding another proxy layer or clearing history |
 
-新安装优先识别终端已有的 TypeSafe / OpenRouter / AI Gateway 密钥。没有密钥时在本地终端隐藏输入，或者稍后到看板的「连接设置」填写。密钥缺失时安装可以完成，但 **Jev 工具还不能正常使用**；补充密钥后重新连接 MCP。密钥不应粘贴到聊天、命令行参数或 GitHub。
+For a new Jev installation, setup first checks for TypeSafe, OpenRouter, or AI Gateway credentials in the terminal environment. If no key is available, enter it in the local terminal with input hidden, or add it later in the dashboard's connection settings. Setup can finish without a key, but **Jev tools cannot be used until credentials are configured**. Reconnect the MCP client after adding the key. Do not paste credentials into chat, command-line arguments, or GitHub.
 
-指定 OpenRouter：
+To select OpenRouter explicitly:
 
 ```sh
 jev-observatory setup --provider openrouter
 ```
 
-新安装的 Jev 放在数据目录，不依赖临时 npx 缓存，不会因清理 npx 缓存断开。安装只添加工具与观测链路，不强制 Agent 每条消息都调用 Jev。
+New Jev installations are stored in the data directory, outside the temporary npx cache. Clearing that cache will not break the integration. Setup adds tools and the observation layer; it does not force your agent to call Jev on every message.
 
-## 支持哪些客户端
+## Supported clients
 
-| 客户端 | 默认接入位置 |
+| Client | Default configuration location |
 | --- | --- |
-| Codex | `$CODEX_HOME/config.toml` 或 `~/.codex/config.toml` |
+| Codex | `$CODEX_HOME/config.toml` or `~/.codex/config.toml` |
 | Cursor | `~/.cursor/mcp.json` |
-| Claude Code | `~/.claude.json` 中的用户级 `mcpServers` |
-| Claude Desktop | macOS：`~/Library/Application Support/Claude/claude_desktop_config.json`；Windows：`%APPDATA%/Claude/claude_desktop_config.json` |
+| Claude Code | User-level `mcpServers` in `~/.claude.json` |
+| Claude Desktop | macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows: `%APPDATA%/Claude/claude_desktop_config.json` |
 
-默认检测这些已存在的配置文件，并展示待修改清单。如果没有检测到配置，交互模式会让你选择客户端；也可以显式指定：
+By default, setup detects these existing configuration files and lists the proposed changes. If none are found, interactive setup asks you to choose a client. You can also specify one explicitly:
 
 ```sh
 jev-observatory setup --client codex
@@ -59,47 +59,50 @@ jev-observatory setup --client claude-code
 jev-observatory setup --client claude-desktop
 ```
 
-项目级配置需要显式指定，安装器不会扫描所有项目或修改组织托管配置：
+Project-level configuration must be selected explicitly. The installer does not scan every project or modify organization-managed configuration:
 
 ```sh
 jev-observatory setup --client cursor --config /absolute/path/to/project/.cursor/mcp.json
 jev-observatory setup --client claude-code --config /absolute/path/to/project/.mcp.json
 ```
 
-Claude Code 项目作用域中的同名配置可能覆盖用户级配置；请接入实际生效的那份配置。其他客户端可使用兼容的 JSON `mcpServers` 文件，通过 `--client cursor --config ...` 接入；不宣称自动识别所有客户端。
+A Claude Code project-level entry with the same name may take precedence over the user-level entry. Connect the configuration that is actually in use. Other clients with a compatible JSON `mcpServers` file can use `--client cursor --config ...`; automatic detection does not cover every MCP client.
 
-自动识别 Jev 服务名或 `@jkudish/jev-mcp` 启动命令。已有 TypeSafe `evaluate mcp` 等其他 stdio 服务可显式指定条目（不会自动安装 TypeSafe 二进制）：
+Setup recognizes the Jev service name or a launch command containing `@jkudish/jev-mcp`. To connect another existing stdio service, such as TypeSafe's `evaluate mcp`, select its entry explicitly. This does not install the TypeSafe binary:
 
 ```sh
 jev-observatory setup --client codex --server typesafe
 ```
 
-不支持自动迁移远程 HTTP/SSE 服务、`envFile`、相对 `cwd` 或启动命令里的客户端变量。遇到这些情况保留原配置并说明原因。环境变量字段里的客户端插值仍由原客户端解析；已禁用的服务保留禁用状态。
+Automatic migration does not support remote HTTP/SSE servers, `envFile`, relative `cwd` values, or client variables in launch commands. These configurations are left unchanged with an explanation. Variable interpolation in environment fields remains the original client's responsibility. Disabled services remain disabled.
 
-客户端格式依据：[Codex MCP](https://developers.openai.com/codex/mcp/)、[Cursor MCP](https://cursor.com/docs/mcp)、[本地 MCP 接入](https://modelcontextprotocol.io/docs/develop/connect-local-servers)。上游服务与密钥说明：[Jev MCP](https://github.com/jkudish/jev-mcp)。
+Configuration references: [Codex MCP](https://developers.openai.com/codex/mcp/), [Cursor MCP](https://cursor.com/docs/mcp), and [connecting local MCP servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers). Upstream installation and credential details: [Jev MCP](https://github.com/jkudish/jev-mcp).
 
-## 安装后如何自动运行
+## How automatic observation works
 
 ```text
-Agent / MCP 客户端
-       ↓ 调用原来的 Jev 工具名
-本地 MCP 观察代理 ─────→ Jev MCP ─────→ 模型服务
-       │                    ↓ 返回
-       └──真实输入、阶段、返回、用量──→ 本机 SQLite
-                                          ↓ 自动读取
-                                      Jev 活动看板
+Agent / MCP client
+       | Calls the original Jev tool names
+       v
+Local observation proxy ------> Jev MCP ------> Model provider
+       |                           | Response
+       +--- Inputs, stages, results, usage ---> Local SQLite
+                                                    |
+                                             Automatic reads
+                                                    v
+                                           Jev Activity Dashboard
 ```
 
-- 客户端启动 MCP 时，代理检查并自动启动本机看板服务。只启动服务，不反复弹浏览器。
-- 第一次 `tools/list` 自动读取上游工具列表，无需手动点击「发现工具」。安装和发现工具不会调用模型。
-- 浏览器关掉仍会记录，重新打开即可查看。看板服务停掉也不影响代理写入；运行 `jev-observatory open` 可以再次启动。
-- 右上角「停止监听」控制新调用的记录。停止期间 Jev 照常执行，历史保留，已开始的调用收齐结果；恢复后不补录停止期间的调用。
-- 只观察经过代理的调用。其他客户端直接连 Jev、直接调用 SDK/API 的流量不会被捕获。
-- 如果 Agent 没有调用 Jev，看板不会凭空产生记录。
+- When the client starts the MCP proxy, the proxy checks for the local dashboard service and starts it if needed. It does not repeatedly open browser windows.
+- The first `tools/list` request discovers the upstream tools automatically. There is no need to click a discovery button. Installation and tool discovery do not call a model.
+- Recording continues when the browser is closed. Stopping the dashboard service also does not stop proxy writes. Run `jev-observatory open` to start the dashboard again.
+- The recording toggle in the top-right corner controls whether new calls are recorded. While recording is off, Jev still runs, history is retained, and already-recorded calls finish their lifecycle. Calls made while recording was off are not backfilled when it resumes.
+- Only calls routed through the proxy are observed. Direct Jev connections from other clients and direct SDK/API calls are not captured.
+- If the agent does not call Jev, the dashboard does not invent activity.
 
-安装向导不会偷偷改变模型选择，也不自动发起收费模型测试。真实 Jev 调用仍按你的供应商账户收费。
+Setup does not silently change your model selection or run paid model tests. Actual Jev calls remain billable through your provider account.
 
-## 查看连接状态
+## Check your connection
 
 ```sh
 jev-observatory doctor
@@ -107,79 +110,79 @@ jev-observatory doctor --discover
 jev-observatory open
 ```
 
-`stop` 只停止本工具启动且身份匹配的后台看板，不停止 Jev 或外部服务。安装意外中断留下 `setup.lock` 时，确认没有安装进程后可删除该锁文件。
+`stop` stops only a background dashboard started by this tool whose process identity matches. It does not stop Jev or unrelated services. If an interrupted installation leaves a `setup.lock` file, remove it from the data directory only after confirming that no setup process is running.
 
-`doctor` 检查配置、代理路径、声明的必需凭据和看板端口；`--discover` 额外通过真实 `tools/list` 验证上游连通，不调用模型。客户端动态注入的变量可能只有从客户端启动时才可用，终端检查不等于客户端已完成加载。
+`doctor` checks configuration, proxy paths, declared required credentials, and the dashboard port. Adding `--discover` verifies the upstream connection with a real `tools/list` request, without calling a model. Variables injected dynamically by the MCP client may only be available when launched by that client; a terminal check does not prove the client has loaded the configuration.
 
-端口冲突时显式选择空闲端口，新接入的代理和看板共用这一设置：
+If the default port is occupied, choose an available one. Newly connected proxies and the dashboard will share that setting:
 
 ```sh
 jev-observatory setup --client cursor --port 4328
 jev-observatory open --port 4328
 ```
 
-已经接入的条目会保持原端口；要迁移它，先 restore，再用新端口 setup。其他服务占用的进程不会被安装器终止。
+Already-connected entries retain their original port. To move one, run `restore`, then run `setup` with the new port. The installer does not terminate unrelated processes occupying a port.
 
-## 恢复与卸载
+## Restore and uninstall
 
 ```sh
 jev-observatory restore
-# 或只恢复指定客户端：
+# Or restore only a specific client:
 jev-observatory restore --client cursor
 jev-observatory stop
 npm uninstall -g jev-observatory
 ```
 
-先恢复配置、重启客户端，再卸载程序。对于接入前已有的 MCP，恢复原始启动方式；对于工具新建的 MCP，移除该条目。不会覆盖接入后你对该 MCP 的手动修改，也不会回滚其他客户端设置。
+Restore the configuration and restart the client before uninstalling. Existing MCP entries return to their original launch configuration; entries created by this tool are removed. Restore will not overwrite manual changes made to the connected MCP entry afterward or roll back unrelated client settings.
 
-备份位于数据目录的 `integrations/<id>/`。`client.before` 是原配置备份，可能含你原来已有的密钥，请勿分享。历史、密钥、上游包和备份会保留；卸载后需要删除时，在相关进程停止后自行删除数据目录。
+Backups live in `integrations/<id>/` inside the data directory. `client.before` contains the original client configuration and may include credentials that were already present; do not share it. History, credentials, upstream packages, and backups are retained after uninstalling. To remove them, stop the relevant processes and delete the data directory yourself.
 
-升级前先关闭 MCP 客户端、运行 `jev-observatory stop`，再运行新的版本安装命令和 `jev-observatory open`，最后重启 MCP 客户端。保持同一个全局安装位置。不要移动或删除正在被客户端配置引用的安装目录。已有旧版手工代理会被识别并跳过；旧版启动脚本保持原有启动方式。
+Before upgrading, close the MCP client and run `jev-observatory stop`. Install the new version, run `jev-observatory open`, and restart the MCP client. Keep the same global installation location. Do not move or delete an installation directory that is still referenced by a client configuration. Existing manually configured legacy proxies are recognized and skipped; their original startup mechanism remains in place.
 
-## 可视化与计数
+## Visualization and counters
 
-输入内容 → 工具和判断要求 → 实际返回 → 分类 / 打分 / 是非 / 其他 → 对应结果池。
+Input content → tool and judgment requirements → actual response → classification / score / yes-no / other → corresponding result pools.
 
-候选名称、问题维度、概率、评分范围均取自输入声明与真实返回，不内置「重复玩法」等业务类别。未命中的候选仍展示。没有概率或分数范围时保持未知，不猜测高低档位。淡黄色只标记返回选择，不代表好坏。
+Candidate names, question dimensions, probabilities, and score ranges come from the declared inputs and actual responses. Business categories such as "duplicate use case" are not built in. Candidates with no matches remain visible. Missing probabilities and score ranges stay unknown; the dashboard does not invent high/low bands. Pale yellow highlights the returned choice, not whether an outcome is good or bad.
 
-- 顶部调用数：代理记录的 MCP 调用次数。
-- 「本次」：当前一个调用中，命中该池子的返回项数。
-- 「同规则累计」：本地记录里相同工具、候选与判断定义的命中项数；不是独立业务条目数。
-- 「展示 x / y」：本次返回项的展示位置；不是模型运算进度。
-- 同一内容被多次真实调用，每次返回都计入；动画回放不增加计数。
-- 时长包含上游进程启动、连接和等待。用量仅显示上游明确返回的数据。
+- **Total calls:** MCP calls recorded by the proxy.
+- **Current call:** The number of returned items assigned to a pool within the selected call.
+- **Same-rule total:** Recorded items assigned to that pool across calls with matching tool, candidate, and judgment definitions. This is not a count of unique business records.
+- **Displaying x / y:** The presentation position within the current call's returned items, not model computation progress.
+- Repeated real calls on the same content each contribute to the counts. Replaying an animation does not.
+- Duration includes upstream process startup, connection, and waiting. Usage appears only when explicitly reported by the upstream server.
 
-页面按持久游标顺序展示完成调用。动效发生在结果返回后，不揭示模型内部思考或真实内部进度，也不证明你的业务已经执行了某个动作。输入内容纵向滚动；输出、候选和历史各自分页，顶部统计固定。支持减少动态效果。
+A persistent cursor presents completed calls in order. Animations run after results arrive; they do not expose model reasoning, represent internal execution progress, or prove that your application performed a downstream action. Input content scrolls vertically. Outputs, candidates, and history paginate separately while the top-level metrics remain fixed. Reduced motion is supported.
 
-## 本地数据与安全边界
+## Local data and security boundaries
 
-默认目录：macOS / Linux 为 `$XDG_DATA_HOME/mcp-observatory` 或 `~/.local/share/mcp-observatory`；Windows 为 `%LOCALAPPDATA%/mcp-observatory`。兼容旧安装的 `~/.local/share/jev-observatory`。
+Default data directory: `$XDG_DATA_HOME/mcp-observatory` or `~/.local/share/mcp-observatory` on macOS / Linux; `%LOCALAPPDATA%/mcp-observatory` on Windows. Existing installations using `~/.local/share/jev-observatory` remain supported.
 
-| 设置 | 用途 |
+| Setting | Purpose |
 | --- | --- |
-| `--data` / `MCP_OBSERVATORY_DATA` | 数据、凭据、备份目录 |
-| `--port` / `MCP_OBSERVATORY_PORT` | 看板端口，默认 4318 |
-| `MCP_OBSERVATORY_CONFIG` | 自定义上游配置；自动安装要求使用数据目录里的 `servers.json` |
-| `MCP_OBSERVATORY_NO_AUTOSTART=1` | 代理仅记录，不自动启动看板服务 |
+| `--data` / `MCP_OBSERVATORY_DATA` | Directory for data, credentials, and backups |
+| `--port` / `MCP_OBSERVATORY_PORT` | Dashboard port; defaults to 4318 |
+| `MCP_OBSERVATORY_CONFIG` | Custom upstream configuration; automatic setup requires `servers.json` inside the data directory |
+| `MCP_OBSERVATORY_NO_AUTOSTART=1` | Record through the proxy without automatically starting the dashboard service |
 
-凭据以明文保存在本机独立文件，POSIX 上限制为当前用户权限；Windows 使用用户目录 ACL。输入输出仍可能含私密业务内容；已知密钥与常见敏感字段脱敏不能代替分享前检查。安装器不上传配置、密钥、日志或数据库。看板只绑定 loopback，有 Host / Origin / CSRF 检查；不支持公网部署和多用户访问。
+Credentials are stored in a separate plaintext local file, restricted to the current user on POSIX. Windows uses the user directory's ACLs. Inputs and outputs may still contain private business content; redacting known credentials and common secret fields does not replace reviewing records before sharing them. The installer does not upload configuration, credentials, logs, or databases. The dashboard binds only to loopback and checks Host, Origin, and CSRF tokens. Public hosting and multi-user access are not supported.
 
-代理目前仅支持 **stdio tools/list、tools/call**，每次工具调用启动一个上游进程，不支持跨调用会话、resources、prompts、sampling、elicitation 或其他交互回调。取消不能撤销上游已执行的外部动作。完整说明见 [SECURITY.md](SECURITY.md)。
+The proxy currently supports only **stdio `tools/list` and `tools/call`**, starting a new upstream process for each tool call. It does not support sessions across calls, resources, prompts, sampling, elicitation, or other interactive callbacks. Cancellation cannot undo external actions already performed upstream. See [SECURITY.md](SECURITY.md) for details.
 
-## 开发
+## Development
 
 ```sh
 npm ci
 npm test
 node scripts/smoke.mjs
-# 不装 Jev，不联网，不调用模型的本地示例：
+# Local demo: no Jev installation, network access, or model calls:
 npm run setup:demo
 npm run discover
 npm start
 ```
 
-建议为示例指定独立 `MCP_OBSERVATORY_DATA`，避免混入真实历史。CI 覆盖 Linux、macOS、Windows；本地验证不会冒充其他系统的验证结果。
+Use a separate `MCP_OBSERVATORY_DATA` directory for demos to keep them out of real activity history. CI covers Linux, macOS, and Windows; local verification alone is not a substitute for checks on the other platforms.
 
-源码：`bin/` 安装与管理命令，`src/` 代理和本地服务，`public/` 界面，`test/` 隔离测试，`examples/` 通用配置。保留 `npm run config` 供不受安装向导支持的客户端生成手工配置。
+Source layout: `bin/` for installation and management commands, `src/` for the proxy and local server, `public/` for the interface, `test/` for isolated tests, and `examples/` for generic configuration. `npm run config` remains available to generate manual configuration for clients outside the setup wizard's supported formats.
 
-MIT License。Jev MCP 是独立上游项目，按其自身许可证发布。
+MIT License. Jev MCP is a separate upstream project distributed under its own license.
